@@ -641,8 +641,10 @@ npx wrangler pages deploy . --project-name event-form-static --branch main
 - `.admin-title h1`: `26px / 800 / 📋 이벤트 응답 관리`
 - **액션 버튼은 모두 상단에 모여 있음** (`.admin-actions`):
   ```
-  [입력 폼 →]  [엑셀 내보내기 (primary)]  [CSV 내보내기]  [전체 삭제 (danger)]  [로그아웃]
+  [입력 폼 →]  [📊 구글 시트]  [엑셀 내보내기 (primary)]  [CSV 내보내기]  [전체 삭제 (danger)]  [로그아웃]
   ```
+- **📊 구글 시트** 버튼: `<a class="btn-sm" target="_blank" rel="noopener">` — Google Sheets 원본을 새 탭으로 연다.
+  - 링크: `https://docs.google.com/spreadsheets/d/1xhZ5W7YVJk9tWT8v5aL5ezab89YR-DgNut-1LbSjcYo/edit?gid=1036698934#gid=1036698934`
 - `.btn-sm`: padding `9px 16px`, font 13px, border-radius 10px, 흰 배경 + border, hover 시 primary 컬러
 - `.btn-sm.primary`: primary→dark 그라디언트, 흰 글자
 - `.btn-sm.danger`: hover 시 `border-color: var(--error); color: var(--error)`

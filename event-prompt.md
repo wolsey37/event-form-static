@@ -449,3 +449,253 @@ npx wrangler pages deploy . --project-name event-form-static --branch main
 | **Google Sheets** | https://docs.google.com/spreadsheets/d/1xhZ5W7YVJk9tWT8v5aL5ezab89YR-DgNut-1LbSjcYo |
 | **Apps Script** | https://script.google.com/macros/s/AKfycbz4ihndsT6HQh1WYRch8vnCdRlY084Tw5sPrLDfLpCJ5raQROrUysoTEZMdjcLSWC3nbw/exec |
 | Cloudflare 계정 | wolsey@pharma-bros.com |
+
+---
+
+## 6. 디자인 디테일 보정사항 (배포 사이트 기준)
+
+기존 스펙(섹션 1~4)에서 누락되었거나 모호했던 디테일을, 실제 배포된 `event-form-static.pages.dev`를 기준으로 보정합니다.
+**이 섹션이 위 본문과 충돌할 경우 이 섹션이 우선합니다.**
+
+### 6.1 공통
+
+- **HTML `<title>`**
+  - `index.html` → `[친한약사 X YDY] 이벤트 당첨자 정보 입력`
+  - `admin.html` → `[친한약사 X YDY] 관리자 — 응답 조회`
+- **CSS reset**: `* { margin: 0; padding: 0; box-sizing: border-box; }` 명시
+- **Pretendard import**: `&display=swap` 포함
+
+### 6.2 index.html 보정
+
+#### 헤더 배지
+- `.header-badge`: 흰 배경 + `var(--brand-primary)` 글자색, `border: 1px solid rgba(255,107,53,0.15)`, padding `5px 14px`, 글자 12px
+- 점 애니메이션은 **opacity 기반** (ripple 아님):
+  ```css
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.8); }
+  }
+  ```
+- 점 크기 `6px × 6px`
+- h1 `22px` / 본문 p `13.5px line-height: 1.7`
+
+#### 상품 카드
+- `.product-card`에 `border: 1px solid var(--border-light)` 추가
+- `.product-banner`
+  - 그라디언트 방향: `linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%)` (secondary→primary)
+  - `padding: 16px 20px`
+  - **데코 원**: `::before`로 우상단 반투명 화이트 원 배치
+    ```css
+    .product-banner::before {
+      content: '';
+      position: absolute; right: -20px; top: -30px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    ```
+  - 태그 클래스명: `.product-banner-tag` (페이지 내 일관성), 글자 11px
+  - 제목은 banner 내부 `<h2>`, 글자 15px
+- `.product-meta`
+  - **세로 정렬 컬럼 4개** (라벨 + 값), `border-right`로 구분, 좌우 패딩 `12px 20px`
+  - `.meta-label`: 10px / uppercase / letter-spacing 0.3px / `var(--text-tertiary)`
+  - `.meta-value`: 12.5px / 700 / `var(--text-primary)` / nowrap
+  - 판매가 값에는 `<span style="color:var(--brand-primary);font-size:10px;">(35%↓)</span>` 인라인
+
+#### 폼 카드
+- `.form-card`에 `border: 1px solid var(--border-light)` 추가
+- **상단에 `.form-intro` 섹션** 필수:
+  ```html
+  <div class="form-intro">
+    <h3>당첨자 정보</h3>
+    <p>입력하신 정보로 상품을 배송해 드릴 예정이에요.</p>
+    <div class="required-note">* 표시는 필수 입력 항목이에요</div>
+  </div>
+  ```
+  - h3 앞에 그라디언트 세로바 데코(`::before`, 3×15px, primary→secondary)
+  - 하단 `border-bottom: 1px solid var(--border-light)`로 구분
+
+#### 필드 구조
+- 필드 래퍼 클래스명은 **`.field`** (not `.form-field`)
+- 라벨 안에 `field-hint`(서브설명) 포함:
+  ```html
+  <label>
+    구매하신 제품명 <span class="required">*</span>
+    <div class="field-hint">옵션(박스 수)을 포함해 주세요</div>
+  </label>
+  ```
+- 필수표시: `<span class="required">*</span>` (red, margin-left:2px)
+- 입력 필드 스타일:
+  - `padding: 11px 14px`, `font-size: 14px`, `border-radius: 10px`
+  - 기본 배경 `#FAFAF8`, hover/focus 시 `white`
+  - placeholder 색 `#C4BBB3`, 글자 13px
+- 에러 표시: `.field.error`가 부모에 추가되면 input은 `border-color: var(--error); background: #FFF5F5;`
+- `.field-error-msg` 11px / red, `.field.error` 일 때만 display
+
+#### 필드별 hint 텍스트
+| 필드 | 라벨 | hint |
+|---|---|---|
+| product | 구매하신 제품명 | 옵션(박스 수)을 포함해 주세요 |
+| instagram | 인스타그램 아이디 | 본인 확인에 사용돼요 |
+| recipient | 수령인 성함 | (없음) |
+| address | 배송 주소 | 검색 후 상세 주소(동·호수)를 입력해 주세요 |
+| phone | 연락처 | 배송 연락에 사용돼요 |
+| order_number | 주문번호 | 결제 완료 후 받은 주문번호예요 |
+
+- 제품명 placeholder: `예: 친한약사 X YDY 데일리 이뮨 C&D / 3박스`
+- 인스타 placeholder: `your_id`
+- 연락처 placeholder: `010-0000-0000`
+
+#### 주소 필드
+- `.addr-row input`, `.addr-base` 는 readonly 시 배경 `#F3F2F0 !important`, 글자 `var(--text-secondary)`, focus 효과 제거
+- `.btn-addr-search`: `linear-gradient(135deg, var(--brand-primary), var(--brand-dark))`, height 44px, padding `0 16px`, 그림자 `0 3px 8px rgba(255,107,53,0.3)`
+- **주소 직렬화 형식** (hidden `address` 필드 값):
+  ```js
+  // (우편번호) 기본주소 상세주소
+  addrFull.value = zip
+    ? `(${zip}) ${base}${detail ? ' ' + detail : ''}`
+    : (base ? `${base}${detail ? ' ' + detail : ''}` : detail);
+  ```
+
+#### 전화번호 자동 포맷·검증
+- 자동 포맷:
+  ```js
+  function formatPhone(v) {
+    const n = v.replace(/\D/g, '');
+    if (n.length <= 3) return n;
+    if (n.length <= 7) return `${n.slice(0,3)}-${n.slice(3)}`;
+    return `${n.slice(0,3)}-${n.slice(3,7)}-${n.slice(7,11)}`;
+  }
+  ```
+- 검증 정규식: `/^01[0-9]-\d{3,4}-\d{4}$/` — 휴대폰만 허용
+
+#### 검증 동작
+- 각 input에 `blur`로 per-field 검증 → `.field.error` 토글
+- `input` 이벤트는 이미 에러인 필드만 재검증
+- submit 시 모든 필드 검증 → 실패하면 토스트 `'필수 항목을 확인해 주세요'` + 첫 에러 필드로 `scrollIntoView({behavior:'smooth', block:'center'})`
+- 주소는 `validateAddress()`로 별도 검증 (zipcode 없어도 detail만으로 통과 가능)
+
+#### 폼 액션 영역
+```css
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-light);
+}
+```
+- 버튼 padding `13px 20px`, font 14px, border-radius 10px
+- `.btn-primary` 그라디언트: `linear-gradient(135deg, var(--brand-primary), var(--brand-dark))` (primary→dark)
+- `.btn-secondary`: `flex: 0 0 auto`, padding `0 16px`, font 13px
+- **모바일(`max-width:540px`)**: `flex-direction: column-reverse` (제출 버튼이 위로), `.btn-secondary { flex: 1; }`
+
+#### 제출 결과
+- 성공 시 토스트 `'제출 완료! 🎉'` 표시 후 `renderSuccess` 호출
+- `renderSuccess(data)` 는 `id, recipient, phone, instagram, orderNumber` 행을 동적 innerHTML로 주입
+
+#### 성공 화면
+- 클래스명: `.success-screen` (not `.success-card`), padding `40px 24px`
+- 진입 애니메이션: `fadeInUp 0.4s ease`
+- 아이콘 컨테이너 `68×68`, 그라디언트 `linear-gradient(135deg, #FFB088, #FF6B35)` (밝은쪽→primary)
+- 아이콘 SVG 체크: `viewBox="0 0 24 24" stroke-width="3"`, points `20 6 9 17 4 12`
+- 아이콘 bounce는 **반복(0%,100% scale1; 50% scale1.12)** 가 아닌 **0.5s 1회** 형태로 사용
+- 본문 카피: `입력하신 정보를 기반으로<br>빠르게 상품을 준비해서 보내드릴게요 ❤`
+- 요약 카드 클래스 `.success-summary`, dashed border (`var(--brand-accent)`), padding `16px 18px`
+- 요약 행 `.success-summary-row`: label / value 양 끝 정렬, value `max-width: 60%; text-align:right; word-break:break-word`
+- 돌아가기 버튼: `.btn.btn-secondary`, `max-width: 180px; margin: 0 auto; display: block`
+
+#### 푸터
+- 글자 11.5px, line-height 1.8
+- 두 번째 `<p>`에 `style="margin-top:6px;"` 적용
+
+### 6.3 admin.html 보정
+
+#### 배경
+- `body` 배경을 index와 다르게:
+  ```css
+  background: linear-gradient(135deg, #FFF4ED 0%, #FFE8D6 50%, #FFF4ED 100%);
+  background-attachment: fixed;
+  ```
+- `--text-tertiary: #8A8A8A`, `--border-light: #F0E8E0`, `--border-input: #E5DDD4` 로 약간 조정
+- 그림자 변수 추가: `--shadow-lg: 0 12px 32px rgba(255,107,53,0.12), 0 4px 12px rgba(0,0,0,0.06)`
+
+#### 로그인 화면
+- **풀스크린 센터링**: 별도 래퍼 `.login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding: 32px 20px; }`
+- `.login-card`: `border-radius: 20px; padding: 40px 32px; max-width: 420px; box-shadow: var(--shadow-lg)`, `fadeInUp 0.5s ease` 진입
+- **상단 배지**: `.login-logo { background: var(--brand-soft); color: var(--brand-primary); padding: 8px 18px; border-radius:100px; font-size:13px; font-weight:700; }` + `::before { content: '🔒'; }`
+- 텍스트:
+  - `<div class="login-logo">관리자 로그인</div>`
+  - `<h1>이벤트 응답 관리</h1>`
+  - `<p class="sub">응답 데이터를 조회하려면 로그인하세요.</p>`
+- **input value 사전 입력**: `value="admin"` / `value="1234"` (편의성)
+- 로그인 실패 메시지: `<div class="login-err">아이디 또는 비밀번호가 올바르지 않습니다.</div>` — 빨간 배경 박스 (`#FFF5F5`, padding `10px 14px`, border-radius 10px)
+- 로그인 버튼 클래스: `.btn-login` (primary 그라디언트, full-width, padding 14px)
+
+#### 어드민 상단
+- 구조: 좌측 `.admin-title`(세로) + 우측 `.admin-actions` (flex-wrap)
+- `.admin-title .badge`: 흰 배경, primary 글자색, 점 데코(6×6), `width: fit-content`
+- `.admin-title h1`: `26px / 800 / 📋 이벤트 응답 관리`
+- **액션 버튼은 모두 상단에 모여 있음** (`.admin-actions`):
+  ```
+  [입력 폼 →]  [엑셀 내보내기 (primary)]  [CSV 내보내기]  [전체 삭제 (danger)]  [로그아웃]
+  ```
+- `.btn-sm`: padding `9px 16px`, font 13px, border-radius 10px, 흰 배경 + border, hover 시 primary 컬러
+- `.btn-sm.primary`: primary→dark 그라디언트, 흰 글자
+- `.btn-sm.danger`: hover 시 `border-color: var(--error); color: var(--error)`
+
+#### 통계 카드 (3개)
+| 라벨 | 값 |
+|---|---|
+| 총 제출 건수 | 전체 응답 수 |
+| 오늘 제출 | 오늘 날짜의 응답 수 |
+| 최근 업데이트 | **가장 최신 제출 시각** (timestamp, `YYYY-MM-DD HH:mm`), 데이터 없으면 `-` |
+
+- `.stat-label`: 11px, uppercase, letter-spacing 0.3px
+- `.stat-value`: 28px, 800, **`var(--brand-primary)` 색상**
+- `.stat-value.small { font-size: 16px; }` — 최근 업데이트 셀에 적용
+
+#### 툴바
+```
+[검색 input]  [새로고침]                        조회: <strong>0</strong>건
+```
+- 검색 placeholder: `🔍 인스타 / 수령인 / 주문번호 검색`
+- `.stats-inline { margin-left: auto; font-size: 13px; color: var(--text-tertiary); }`, strong은 primary
+- 검색 input 너비 `min-width: 220px`, 모바일에서 `width: 100%`
+
+#### 테이블
+- **컬럼 10개** (행 번호 포함):
+  ```
+  # | 제출번호 | 제출시각 | 상품 | 인스타그램 | 수령인 | 주소 | 연락처 | 주문번호 | (삭제버튼)
+  ```
+- thead th: `font-size: 11px`, `text-transform: uppercase`, `letter-spacing: 0.4px`, `color: var(--text-tertiary)`, 배경 `var(--brand-softer)`
+- `td.num`: 행 번호, tertiary 색
+- `td.id-cell`: **`var(--brand-primary)` 색**, 700, 12px
+- `td.date-cell`: tertiary, 12px
+- `td.addr-cell`: max-width 220px, 12px
+- 정렬: 항상 `submittedAt` desc
+- 삭제 버튼 `.submission-del`: 작고 중립적(border-input + tertiary), hover 시 빨강
+
+#### Empty state (테이블 비어있을 때)
+- 별도 박스 `.empty-state`: 80px 패딩, dashed border, 가운데 정렬
+- 📭 아이콘(56px, opacity 0.5) + 메시지
+- 메시지는 상황별:
+  - 데이터 0건: `아직 제출된 데이터가 없어요`
+  - 검색 결과 0건: `검색 결과가 없어요`
+
+#### 로그아웃
+- `localStorage.removeItem(SESSION_KEY)` 후 `location.reload()` (페이지 새로고침으로 로그인 화면 복귀)
+
+#### 삭제 확인
+- 개별 삭제: `이 응답을 삭제할까요? 되돌릴 수 없습니다.`
+- 전체 삭제: `모든 제출 데이터를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.` (단일 confirm)
+
+#### Toast 사이즈
+- admin.html 토스트는 약간 큼: `padding: 14px 24px; font-size: 14px; bottom: 32px`
+
+#### 반응형 (`max-width: 600px`)
+- `.admin-top { flex-direction: column; align-items: flex-start; }`
+- `.admin-stats { grid-template-columns: 1fr; }`
+- `.toolbar input[type="text"] { width: 100%; min-width: 0; }`
+- `.toolbar .stats-inline { margin-left: 0; }`
+- `.admin-actions { width: 100%; }` + `.admin-actions .btn-sm { flex: 1; }`

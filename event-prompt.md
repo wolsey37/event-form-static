@@ -304,9 +304,12 @@ document.getElementById('back-btn').addEventListener('click', () => {
 ```html
 <div class="footer">
   <p>제출하신 정보는 배송 목적에만 이용되며, 배송 완료 후 즉시 파기됩니다.</p>
-  <p><a class="admin-toggle" href="admin.html?login">관리자 페이지 →</a></p>
+  <p><a class="admin-toggle" href="admin.html?login">관리자 로그인 →</a></p>
 </div>
 ```
+
+- 링크 클릭 시 항상 **로그인 페이지로 이동**해야 함 (`?login` 파라미터로 기존 세션 강제 초기화 → admin.html의 로그인 화면이 노출됨).
+- 링크 텍스트는 `관리자 로그인 →` 으로 표기하여 동작을 명확히 한다.
 
 ---
 

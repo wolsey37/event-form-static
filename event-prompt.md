@@ -93,7 +93,7 @@ function showToast(msg, type = '') {
 
 ### Google Sheets 연동 상수 (두 파일 동일)
 ```js
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/.../exec'; // 배포 후 교체
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4ihndsT6HQh1WYRch8vnCdRlY084Tw5sPrLDfLpCJ5raQROrUysoTEZMdjcLSWC3nbw/exec';
 ```
 
 ### Google Sheets API 호출 패턴
@@ -319,7 +319,7 @@ document.getElementById('back-btn').addEventListener('click', () => {
 ```js
 const ADMIN_ID = 'admin';
 const ADMIN_PW = '1234';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/.../exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4ihndsT6HQh1WYRch8vnCdRlY084Tw5sPrLDfLpCJ5raQROrUysoTEZMdjcLSWC3nbw/exec';
 const SESSION_KEY = 'event_form_admin_session_v1';
 
 let cachedSubs = []; // 로드한 데이터 인메모리 캐시

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>[친한약사 X YDY] 관리자 — 응답 조회</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --brand-primary: #FF6B35;
+    --brand-secondary: #FF8C42;
+    --brand-accent: #FFB088;
+    --brand-dark: #E84E1B;
+    --brand-soft: #FFF4ED;
+    --brand-softer: #FFFAF6;
+    --text-primary: #1A1A1A;
+    --text-secondary: #4A4A4A;
+    --text-tertiary: #8A8A8A;
+    --border-light: #F0E8E0;
+    --border-input: #E5DDD4;
+    --error: #E03131;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 32px rgba(255,107,53,0.12), 0 4px 12px rgba(0,0,0,0.06);
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    background: linear-gradient(135deg, #FFF4ED 0%, #FFE8D6 50%, #FFF4ED 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 16px 64px; }
+
+  /* Login */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+  .login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    animation: fadeInUp 0.5s ease;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .login-logo {
+    display: inline-flex;
+    align-items: center;
+    background: var(--brand-soft);
+    color: var(--brand-primary);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .login-logo::before {
+    content: '🔒';
+    margin-right: 6px;
+  }
+  .login-card h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+  .login-card .sub {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+  .login-card .field { margin-bottom: 14px; }
+  .login-card label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .login-card input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid var(--border-input);
+    border-radius: 10px;
+    background: #FAFAF8;
+    color: var(--text-primary);
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+  .login-card input:focus {
+    outline: none;
+    background: white;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.12);
+  }
+  .login-err {
+    display: none;
+    background: #FFF5F5;
+    color: var(--error);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .login-err.show { display: block; }
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    transition: transform 0.1s, box-shadow 0.15s;
+    margin-top: 6px;
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(255,107,53,0.4); }
+
+  /* Admin top */
+  .admin-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .admin-title {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .admin-title .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    color: var(--brand-primary);
+    border: 1px solid rgba(255,107,53,0.15);
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    width: fit-content;
+    box-shadow: var(--shadow-sm);
+  }
+  .admin-title .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+  }
+  .admin-title h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-sm {
+    padding: 9px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    border-radius: 10px;
+    background: white;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-input);
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: border-color 0.15s, color 0.15s, transform 0.1s, box-shadow 0.15s;
+  }
+  .btn-sm:hover {
+    border-color: var(--brand-accent);
+    color: var(--brand-primary);
+  }
+  .btn-sm.primary {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-dark));
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 3px 8px rgba(255,107,53,0.3);
+  }
+  .btn-sm.primary:hover {
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(255,107,53,0.4);
+  }
+  .btn-sm.danger:hover {
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  /* Stats */
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .stat-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 22px;
+  }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-tertiary);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    letter-spacing: -0.5px;
+  }
+  .stat-value.small { font-size: 16px; }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    padding: 14px 18px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+  }
+  .toolbar input[type="text"] {
+    min-width: 220px;
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid var(--border-input);
+    border-radius: 10px;
+    background: #FAFAF8;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+  .toolbar input[type="text"]:focus {
+    outline: none;
+    background: white;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.12);
+  }
+  .stats-inline {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+  .stats-inline strong {
+    color: var(--brand-primary);
+    font-weight: 800;
+  }
+
+  /* Table */
+  .table-wrap {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    overflow: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    background: var(--brand-softer);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-tertiary);
+    font-weight: 700;
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    vertical-align: middle;
+  }
+  tbody tr:hover { background: var(--brand-softer); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { color: var(--text-tertiary); font-size: 12px; }
+  td.id-cell { color: var(--brand-primary); font-weight: 700; font-size: 12px; }
+  td.date-cell { color: var(--text-tertiary); font-size: 12px; white-space: nowrap; }
+  td.addr-cell { max-width: 220px; font-size: 12px; word-break: break-word; }
+  td.product-cell { max-width: 200px; word-break: break-word; }
+  td.center { text-align: center; padding: 32px 14px; color: var(--text-tertiary); }
+
+  .submission-del {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+    background: white;
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-input);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .submission-del:hover {
+    border-color: var(--error);
+    color: var(--error);
+    background: #FFF5F5;
+  }
+  .submission-del:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 80px 24px;
+    text-align: center;
+    border: 1px dashed var(--border-input);
+    border-radius: 12px;
+    margin: 16px;
+  }
+  .empty-state .icon {
+    font-size: 56px;
+    opacity: 0.5;
+    margin-bottom: 14px;
+  }
+  .empty-state .msg {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    opacity: 0;
+    background: #1A1A1A;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+    z-index: 1000;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show  { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+  .toast.success { background: linear-gradient(135deg, #2BA84A 0%, #1F8836 100%); }
+  .toast.error   { background: linear-gradient(135deg, #E03131 0%, #C92A2A 100%); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .admin-top { flex-direction: column; align-items: flex-start; }
+    .admin-stats { grid-template-columns: 1fr; }
+    .toolbar input[type="text"] { width: 100%; min-width: 0; }
+    .toolbar .stats-inline { margin-left: 0; }
+    .admin-actions { width: 100%; }
+    .admin-actions .btn-sm { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Login view -->
+<div class="login-wrap" id="login-view">
+  <div class="login-card">
+    <div class="login-logo">관리자 로그인</div>
+    <h1>이벤트 응답 관리</h1>
+    <p class="sub">응답 데이터를 조회하려면 로그인하세요.</p>
+    <div class="login-err" id="login-err">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-id">아이디</label>
+        <input type="text" id="login-id" value="admin" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="login-pw">비밀번호</label>
+        <input type="password" id="login-pw" value="1234" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn-login">로그인</button>
+    </form>
+  </div>
+</div>
+
+<!-- Admin view -->
+<div class="container" id="admin-view" style="display:none;">
+  <div class="admin-top">
+    <div class="admin-title">
+      <div class="badge">친한약사</div>
+      <h1>📋 이벤트 응답 관리</h1>
+    </div>
+    <div class="admin-actions">
+      <a class="btn-sm" href="index.html">입력 폼 →</a>
+      <a class="btn-sm" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1xhZ5W7YVJk9tWT8v5aL5ezab89YR-DgNut-1LbSjcYo/edit?gid=1036698934#gid=1036698934">📊 구글 시트</a>
+      <button type="button" class="btn-sm primary" id="export-xlsx-btn">엑셀 내보내기</button>
+      <button type="button" class="btn-sm" id="export-csv-btn">CSV 내보내기</button>
+      <button type="button" class="btn-sm danger" id="clear-all-btn">전체 삭제</button>
+      <button type="button" class="btn-sm" id="logout-btn">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="admin-stats">
+    <div class="stat-card">
+      <div class="stat-label">총 제출 건수</div>
+      <div class="stat-value" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">오늘 제출</div>
+      <div class="stat-value" id="stat-today">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">최근 업데이트</div>
+      <div class="stat-value small" id="stat-recent">-</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="search-input" placeholder="🔍 인스타 / 수령인 / 주문번호 검색" />
+    <button type="button" class="btn-sm" id="refresh-btn">새로고침</button>
+    <div class="stats-inline">조회: <strong id="stat-filtered">0</strong>건</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>제출번호</th>
+          <th>제출시각</th>
+          <th>상품</th>
+          <th>인스타그램</th>
+          <th>수령인</th>
+          <th>주소</th>
+          <th>연락처</th>
+          <th>주문번호</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr><td class="center" colspan="10">불러오는 중...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const ADMIN_ID = 'admin';
+const ADMIN_PW = '1234';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4ihndsT6HQh1WYRch8vnCdRlY084Tw5sPrLDfLpCJ5raQROrUysoTEZMdjcLSWC3nbw/exec';
+const SESSION_KEY = 'event_form_admin_session_v1';
+
+let cachedSubs = [];
+
+// 1. DOM refs
+const loginView = document.getElementById('login-view');
+const adminView = document.getElementById('admin-view');
+const loginForm = document.getElementById('login-form');
+const loginErr  = document.getElementById('login-err');
+const searchInput = document.getElementById('search-input');
+
+// 2. ?login 파라미터 → 세션 강제 초기화
+if (location.search.includes('login')) {
+  localStorage.removeItem(SESSION_KEY);
+  history.replaceState(null, '', location.pathname);
+}
+
+// 3. 로그인 상태면 어드민 표시
+if (localStorage.getItem(SESSION_KEY) === 'ok') showAdmin();
+
+// Toast
+let _toastTimer = null;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  t.textContent = msg;
+  _toastTimer = setTimeout(() => { t.className = 'toast'; _toastTimer = null; }, 2400);
+}
+
+// Login
+loginForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value.trim();
+  if (id === ADMIN_ID && pw === ADMIN_PW) {
+    localStorage.setItem(SESSION_KEY, 'ok');
+    loginErr.classList.remove('show');
+    showAdmin();
+  } else {
+    loginErr.classList.add('show');
+  }
+});
+
+function showAdmin() {
+  loginView.style.display = 'none';
+  adminView.style.display = 'block';
+  loadAndRender();
+}
+
+// API
+async function fetchSubs() {
+  const res = await fetch(APPS_SCRIPT_URL);
+  const result = await res.json();
+  if (!result.success) throw new Error(result.error);
+  return result.data;
+}
+
+async function apiPost(body) {
+  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) });
+  const result = await res.json();
+  if (!result.success) throw new Error(result.error);
+  return result;
+}
+
+// Load & render
+async function loadAndRender() {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = `<tr><td class="center" colspan="10">불러오는 중...</td></tr>`;
+  try {
+    cachedSubs = await fetchSubs();
+    renderTable();
+    return true;
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `<tr><td class="center" colspan="10">데이터를 불러오지 못했어요.</td></tr>`;
+    showToast('데이터를 불러오지 못했어요', 'error');
+    return false;
+  }
+}
+
+function getFiltered() {
+  const q = searchInput.value.trim().toLowerCase();
+  let list = cachedSubs.slice().sort((a, b) => {
+    const ta = new Date(a.submittedAt).getTime() || 0;
+    const tb = new Date(b.submittedAt).getTime() || 0;
+    return tb - ta;
+  });
+  if (!q) return list;
+  return list.filter(s =>
+    (s.instagram   || '').toLowerCase().includes(q) ||
+    (s.recipient   || '').toLowerCase().includes(q) ||
+    (s.orderNumber || '').toLowerCase().includes(q)
+  );
+}
+
+function formatDate(iso, withTime = true) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso || '-';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  if (!withTime) return `${yyyy}-${mm}-${dd}`;
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('table-body');
+
+  // Stats
+  document.getElementById('stat-total').textContent = cachedSubs.length;
+  document.getElementById('stat-filtered').textContent = filtered.length;
+
+  // Today
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const todayCount = cachedSubs.filter(s => formatDate(s.submittedAt, false) === todayStr).length;
+  document.getElementById('stat-today').textContent = todayCount;
+
+  // Recent
+  if (cachedSubs.length === 0) {
+    document.getElementById('stat-recent').textContent = '-';
+  } else {
+    const latest = cachedSubs.reduce((acc, s) => {
+      const t = new Date(s.submittedAt).getTime();
+      return (!acc || (t > acc.t)) ? { t, iso: s.submittedAt } : acc;
+    }, null);
+    document.getElementById('stat-recent').textContent = latest ? formatDate(latest.iso) : '-';
+  }
+
+  // Empty state
+  if (filtered.length === 0) {
+    const isFiltered = searchInput.value.trim().length > 0;
+    const msg = isFiltered ? '검색 결과가 없어요' : '아직 제출된 데이터가 없어요';
+    tbody.innerHTML = `<tr><td colspan="10" style="padding:0;border-bottom:none;">
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <div class="msg">${msg}</div>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((s, idx) => `
+    <tr data-id="${escapeAttr(s.id)}">
+      <td class="num">${idx + 1}</td>
+      <td class="id-cell">#${escapeHtml(s.id)}</td>
+      <td class="date-cell">${escapeHtml(formatDate(s.submittedAt))}</td>
+      <td class="product-cell">${escapeHtml(s.product)}</td>
+      <td>@${escapeHtml(s.instagram)}</td>
+      <td>${escapeHtml(s.recipient)}</td>
+      <td class="addr-cell">${escapeHtml(s.address)}</td>
+      <td>${escapeHtml(s.phone)}</td>
+      <td>${escapeHtml(s.orderNumber)}</td>
+      <td><button type="button" class="submission-del" data-id="${escapeAttr(s.id)}">삭제</button></td>
+    </tr>
+  `).join('');
+
+  // Bind individual delete
+  tbody.querySelectorAll('.submission-del').forEach(btn => {
+    btn.addEventListener('click', () => deleteOne(btn));
+  });
+}
+
+async function deleteOne(btn) {
+  const id = btn.getAttribute('data-id');
+  if (!confirm('이 응답을 삭제할까요? 되돌릴 수 없습니다.')) return;
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '삭제 중...';
+  try {
+    await apiPost({ action: 'delete', id });
+    cachedSubs = cachedSubs.filter(x => x.id !== id);
+    renderTable();
+    showToast('삭제되었어요', 'success');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = original;
+    showToast('삭제에 실패했어요', 'error');
+    console.error(err);
+  }
+}
+
+// Search
+searchInput.addEventListener('input', renderTable);
+
+// Refresh
+document.getElementById('refresh-btn').addEventListener('click', async () => {
+  const ok = await loadAndRender();
+  if (ok) showToast('새로고침 했어요', 'success');
+});
+
+// Clear all
+document.getElementById('clear-all-btn').addEventListener('click', async () => {
+  if (cachedSubs.length === 0) {
+    showToast('삭제할 데이터가 없어요');
+    return;
+  }
+  if (!confirm('모든 제출 데이터를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
+  const btn = document.getElementById('clear-all-btn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '삭제 중...';
+  try {
+    await apiPost({ action: 'clearAll' });
+    cachedSubs = [];
+    renderTable();
+    showToast('전체 삭제되었어요', 'success');
+  } catch (err) {
+    showToast('삭제에 실패했어요', 'error');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+});
+
+// Export
+const HEADERS = ['제출번호','제출일시','제품명','인스타그램','수령인','배송주소','전화번호','주문번호'];
+
+function buildRows() {
+  return getFiltered().map(s => [
+    s.id,
+    formatDate(s.submittedAt),
+    s.product,
+    '@' + s.instagram,
+    s.recipient,
+    s.address,
+    s.phone,
+    s.orderNumber,
+  ]);
+}
+
+function todayFilename() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `친한약사_이벤트당첨자_${yyyy}-${mm}-${dd}`;
+}
+
+document.getElementById('export-xlsx-btn').addEventListener('click', () => {
+  const rows = buildRows();
+  if (rows.length === 0) { showToast('내보낼 데이터가 없어요'); return; }
+  const aoa = [HEADERS, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '당첨자 명단');
+  XLSX.writeFile(wb, `${todayFilename()}.xlsx`);
+  showToast('엑셀 파일을 내보냈어요', 'success');
+});
+
+document.getElementById('export-csv-btn').addEventListener('click', () => {
+  const rows = buildRows();
+  if (rows.length === 0) { showToast('내보낼 데이터가 없어요'); return; }
+  const csvLines = [HEADERS, ...rows].map(r =>
+    r.map(cell => {
+      const s = String(cell ?? '');
+      if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    }).join(',')
+  );
+  const csv = '﻿' + csvLines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${todayFilename()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('CSV 파일을 내보냈어요', 'success');
+});
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+function escapeAttr(s) {
+  return String(s ?? '').replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

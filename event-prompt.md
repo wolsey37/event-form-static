@@ -430,9 +430,22 @@ renderTable();
 5. 발급된 exec URL을 index.html, admin.html의 APPS_SCRIPT_URL에 입력
 ```
 
-### Cloudflare Pages 최초 배포
+### Cloudflare API Token 발급 (최초 1회)
+1. https://dash.cloudflare.com/profile/api-tokens → **Create Token**
+2. 템플릿 사용: **Edit Cloudflare Workers** (Pages 권한 포함)
+   - 또는 Custom Token: `Account > Cloudflare Pages > Edit` 권한
+3. 발급된 토큰 + Account ID(`https://dash.cloudflare.com` 우측 사이드바)를 안전하게 보관
+4. 로컬 환경변수로 등록:
+   ```bash
+   export CLOUDFLARE_API_TOKEN="발급받은_토큰"
+   export CLOUDFLARE_ACCOUNT_ID="계정_ID"
+   ```
+   - 영구 적용: `~/.zshrc`(또는 `~/.bashrc`)에 위 두 줄 추가 후 `source ~/.zshrc`
+   - CI/CD(GitHub Actions 등)에서는 동일 키명으로 Secret 등록
+
+### Cloudflare Pages 최초 배포 (API 토큰 사용)
 ```bash
-npx wrangler login
+# wrangler login 불필요 — 환경변수의 토큰으로 인증
 npx wrangler pages project create event-form-static --production-branch main
 cd event-form-static
 npx wrangler pages deploy . --project-name event-form-static --branch main
@@ -440,9 +453,30 @@ npx wrangler pages deploy . --project-name event-form-static --branch main
 
 ### 재배포
 ```bash
+# CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID 가 셸 환경에 있어야 함
 cd event-form-static
 npx wrangler pages deploy . --project-name event-form-static --branch main
 ```
+
+### GitHub Actions 자동 배포 (선택)
+`.github/workflows/deploy.yml`:
+```yaml
+name: Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=event-form-static --branch=main
+```
+- GitHub 리포지토리 → Settings → Secrets and variables → Actions 에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 등록
 
 ### 배포 정보
 | 구분 | URL |
